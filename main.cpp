@@ -15,6 +15,4 @@ int main() {
   llvm::verifyModule(module, &llvm::outs());
   WriteBitcodeToFile(module, llvm::outs());
   module.dump();
-
-  std::cout << "Hello, world!\n";
 }
