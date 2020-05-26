@@ -31,39 +31,48 @@ int main(int argc, char **argv) {
   InitializeNativeTarget();
   InitializeNativeTargetAsmPrinter();
 
-  auto context = std::make_unique<LLVMContext>();
-  auto module = std::make_unique<Module>("top", *context);
-  llvm::IRBuilder<> builder(*context);
+  auto Context = std::make_unique<LLVMContext>();
+  auto TopModule = std::make_unique<Module>("top", *Context);
 
-  std::vector<Type *> argtypes{Type::getInt32Ty(*context),
-                               Type::getInt32Ty(*context)};
-  FunctionType *FT = FunctionType::get(Type::getInt32Ty(*context), argtypes,
-                                       /*not vararg*/ false);
+  FunctionType *FT = FunctionType::get(
+      Type::getInt32Ty(*Context),
+      {Type::getInt32Ty(*Context), Type::getInt32Ty(*Context)},
+      /*not vararg*/ false);
   Function *F =
-      Function::Create(FT, Function::ExternalLinkage, "fred", *module);
-  BasicBlock *BB = BasicBlock::Create(*context, "EntryBlock", F);
-  Value *Two = ConstantInt::get(Type::getInt32Ty(*context), 2);
-  Value *Three = ConstantInt::get(Type::getInt32Ty(*context), 3);
+      Function::Create(FT, Function::ExternalLinkage, "fred", *TopModule);
+  BasicBlock *BBEntry = BasicBlock::Create(*Context, "EntryBlock", F);
+  BasicBlock *BBTrue = BasicBlock::Create(*Context, "TrueBlock", F);
+  BasicBlock *BBFalse = BasicBlock::Create(*Context, "FalseBlock", F);
+
+  auto Cmp = new ICmpInst(CmpInst::Predicate::ICMP_NE, F->getArg(1),
+                          ConstantInt::get(Type::getInt32Ty(*Context), 0));
+  BBEntry->getInstList().push_back(Cmp);
+  BBEntry->getInstList().push_back(BranchInst::Create(BBTrue, BBFalse, Cmp));
+
+  Value *Two = ConstantInt::get(Type::getInt32Ty(*Context), 2);
+  Value *Three = ConstantInt::get(Type::getInt32Ty(*Context), 3);
   Instruction *Add = BinaryOperator::Create(Instruction::Add, Two, Three);
-  BB->getInstList().push_back(Add);
-  Instruction *Add1 =
-      BinaryOperator::Create(Instruction::Add, Add, F->getArg(0));
-  BB->getInstList().push_back(Add1);
+  BBTrue->getInstList().push_back(Add);
+  Instruction *Mul1 =
+      BinaryOperator::Create(Instruction::Mul, Add, F->getArg(0));
+  BBTrue->getInstList().push_back(Mul1);
 
   // Create the return instruction and add it to the basic block
-  BB->getInstList().push_back(ReturnInst::Create(*context, Add1));
+  BBTrue->getInstList().push_back(ReturnInst::Create(*Context, Mul1));
 
-  llvm::verifyModule(*module, &llvm::outs());
-  WriteBitcodeToFile(*module, llvm::outs());
-  module->dump();
+  BBFalse->getInstList().push_back(ReturnInst::Create(*Context, F->getArg(0)));
 
-  auto TSM = orc::ThreadSafeModule(std::move(module), std::move(context));
+  llvm::verifyModule(*TopModule, &llvm::outs());
+  WriteBitcodeToFile(*TopModule, llvm::outs());
+  TopModule->dump();
 
+  auto TSM = orc::ThreadSafeModule(std::move(TopModule), std::move(Context));
   auto JIT = getExitOnErr()(orc::LLJITBuilder().create());
   getExitOnErr()(JIT->addIRModule(std::move(TSM)));
 
   auto fredSym = getExitOnErr()(JIT->lookup("fred"));
-  int (*fred)(int) = (int (*)(int))fredSym.getAddress();
+  int (*fred)(int, int) = (int (*)(int, int))fredSym.getAddress();
 
-  outs() << "fred(42) = " << fred(42) << "\n";
+  outs() << "fred(42, 0) = " << fred(42, 0) << "\n";
+  outs() << "fred(42, 1) = " << fred(42, 1) << "\n";
 }
