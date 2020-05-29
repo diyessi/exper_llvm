@@ -1,0 +1,9 @@
+add_executable(mlirfact mlirfact.cpp)
+
+target_link_libraries(mlirfact
+PRIVATE
+MLIRAnalysis
+MLIRIR
+MLIRParser
+MLIRSideEffectInterfaces
+MLIRTransforms)
