@@ -1,23 +1,49 @@
 cmake_minimum_required(VERSION 3.4.3)
-project(llvm_exper VERSION 0.1.0)
+
+if(POLICY CMP0068)
+  cmake_policy(SET CMP0068 NEW)
+  set(CMAKE_BUILD_WITH_INSTALL_NAME_DIR ON)
+endif()
+
+if(POLICY CMP0075)
+  cmake_policy(SET CMP0075 NEW)
+endif()
+
+if(POLICY CMP0077)
+  cmake_policy(SET CMP0077 NEW)
+endif()
+
+project(llvm_exper VERSION 0.1.0 LANGUAGES CXX C)
 
 set(CMAKE_PREFIX_PATH "$ENV{HOME}/llvm;${CMAKE_PREFIX_PATH}")
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 14 CACHE STRING "C++ standard to conform to")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-
-find_package(LLVM REQUIRED CONFIG)
-message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
-message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
-include_directories(${LLVM_INCLUDE_DIRS})
-add_definitions(${LLVM_DEFINITIONS})
 
 find_package(MLIR REQUIRED CONFIG)
 message(STATUS "Found MLIR ${MLIR_PACKAGE_VERSION}")
 message(STATUS "Using MLIRConfig.cmake in: ${MLIR_DIR}")
+message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
+message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
+
+set(LLVM_RUNTIME_OUTPUT_INTDIR ${CMAKE_BINARY_DIR}/bin)
+set(LLVM_LIBRARY_OUTPUT_INTDIR ${CMAKE_BINARY_DIR}/lib)
+set(MLIR_BINARY_DIR ${CMAKE_BINARY_DIR})
+
+list(APPEND CMAKE_MODULE_PATH "${MLIR_CMAKE_DIR}")
+list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
+include(TableGen)
+include(AddLLVM)
+include(AddMLIR)
+include(HandleLLVMOptions)
+
+include_directories(${LLVM_INCLUDE_DIRS})
 include_directories(${MLIR_INCLUDE_DIRS})
-add_definitions(${MLIR_DEFINITIONS})
+include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(${PROJECT_BINARY_DIR}/include)
+link_directories(${LLVM_BUILD_LIBRARY_DIR})
+add_definitions(${LLVM_DEFINITIONS})
 
 include(CTest)
 enable_testing()
