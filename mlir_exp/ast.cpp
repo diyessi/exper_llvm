@@ -30,11 +30,11 @@ AstContextManaged::AstContextManaged(AstContext &Context) : Context(Context) {
 
 AstContext &AstNodeValue::getContext() const { return AstNode->getContext(); }
 
-const AstKind ParameterOperation::Kind;
+const AstNode::type_info_t ParameterOperation::TypeInfo;
 
-const AstKind AddOperation::Kind;
+const AstNode::type_info_t AddOperation::TypeInfo;
 
-const AstKind MultiplyOperation::Kind;
+const AstNode::type_info_t MultiplyOperation::TypeInfo;
 
 AstNode::AstNode(AstContext &Context, const std::vector<AstNodeValue> &Operands)
     : AstContextManaged(Context), Operands(Operands) {}

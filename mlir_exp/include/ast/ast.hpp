@@ -14,6 +14,11 @@
 // limitations under the License.
 //*****************************************************************************
 
+#ifndef MLGA_AST_HPP
+#define MLGA_AST_HPP
+
+#include "ast/type_info.hpp"
+
 #include <memory>
 #include <string>
 #include <unordered_set>
@@ -22,16 +27,6 @@
 
 class AstNode;
 class AstContextManaged;
-
-/// \brief metaclass information
-struct AstKind {
-  const char *Name;
-  uint8_t Version;
-  bool operator==(const AstKind &Kind) const {
-    return this == &Kind || (Version == Kind.Version &&
-                             std::string(Name) == std::string(Kind.Name));
-  }
-};
 
 /// \brief Manages lifetime of managed objects
 class AstContext {
@@ -68,12 +63,10 @@ protected:
 
 class AstNode : public AstContextManaged {
 public:
+  using type_info_t = mlga::type_info::DiscreteTypeInfo;
   virtual ~AstNode() {}
   AstNode(AstContext &Context, const std::vector<AstNodeValue> &Operands);
-  virtual AstKind getKind() = 0;
-  void *asKind(const AstKind &Kind) {
-    return getKind() == Kind ? this : nullptr;
-  }
+  virtual const type_info_t &getTypeInfo() = 0;
   void setResultsSize(size_t size);
   const std::vector<AstNodeValue> &getOperands() const { return Operands; };
   const std::vector<AstNodeValue> &getResults() const { return Results; }
@@ -103,7 +96,10 @@ public:
 
   public:
     using AstNode::AstNode;
-    AstKind getKind() { return AstOperationType::Kind; }
+    const type_info_t &getTypeInfo() { return AstOperationType::TypeInfo; }
+    static const type_info_t &getStaticTypeInfo() {
+      return AstOperationType::TypeInfo;
+    }
     AttributesType Attributes;
   };
 
@@ -113,8 +109,7 @@ public:
       : AstOperationImp(Operation.getNode()) {}
 
   AstOperationImp(AstNode *Node)
-      : AstNode(
-            static_cast<AstNodeImp *>(Node->asKind(AstOperationType::Kind))),
+      : AstNode(mlga::type_info::asType<AstNodeImp>(Node)),
         Attributes(AstNode ? &AstNode->Attributes : nullptr) {}
 
   AstOperationImp(const AstOperationType &Operation)
@@ -155,17 +150,17 @@ public:
       : ParameterOperation(Context, std::vector<AstNodeValue>{}) {
     Attributes->Name = Name;
   }
-  static constexpr AstKind Kind{"Parameter", 0};
+  static constexpr AstNode::type_info_t TypeInfo{"Parameter", 0};
 };
 
 class AddOperation : public AstOperationImp<AddOperation> {
 public:
-  static constexpr AstKind Kind{"Add", 0};
+  static constexpr AstNode::type_info_t TypeInfo{"Add", 0};
 };
 
 class MultiplyOperation : public AstOperationImp<MultiplyOperation> {
 public:
-  static constexpr AstKind Kind{"Multiply"};
+  static constexpr AstNode::type_info_t TypeInfo{"Multiply"};
 };
 
 inline AstNodeValue operator+(const AstNodeValue &x, const AstNodeValue &y) {
@@ -175,3 +170,4 @@ inline AstNodeValue operator+(const AstNodeValue &x, const AstNodeValue &y) {
 inline AstNodeValue operator*(const AstNodeValue &x, const AstNodeValue &y) {
   return MultiplyOperation::create(x.getContext(), {x, y})->getResults().at(0);
 }
+#endif
