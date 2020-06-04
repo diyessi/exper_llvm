@@ -14,7 +14,8 @@
 // limitations under the License.
 //*****************************************************************************
 
-#pragma once
+#ifndef MLGA_AST_EXPORTS_HPP
+#define MLGA_AST_EXPORTS_HPP
 
 // https://gcc.gnu.org/wiki/Visibility
 // Generic helper definitions for shared library support
@@ -38,4 +39,6 @@
 #define MLGA_CORE_EXPORT MLGL_HELPER_DLL_EXPORT
 #else
 #define MLGA_CORE_EXPORT MLGL_HELPER_DLL_IMPORT
+#endif
+
 #endif

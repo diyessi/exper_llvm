@@ -14,8 +14,8 @@
 // limitations under the License.
 //*****************************************************************************
 
-#ifndef MY_DIALECT_HPP_
-#define MY_DIALECT_HPP_
+#ifndef MLGA_MY_MY_HPP_
+#define MLGA_MY_MY_HPP_
 
 #include "mlir/IR/Dialect.h"
 #include "mlir/IR/Function.h"

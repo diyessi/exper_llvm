@@ -14,22 +14,36 @@
 // limitations under the License.
 //*****************************************************************************
 
-#include "ast/ast.hpp"
+#ifndef MLGA_AST_CONTEXT_HPP
+#define MLGA_AST_CONTEXT_HPP
 
-const mlga::ast::AstOp::type_info_t mlga::ast::ParameterOp::TypeInfo;
+#include <unordered_set>
 
-const mlga::ast::AstOp::type_info_t mlga::ast::AddOp::TypeInfo;
+namespace mlga {
+namespace core {
+class AstContextManaged;
 
-const mlga::ast::AstOp::type_info_t mlga::ast::MultiplyOp::TypeInfo;
+/// \brief Manages lifetime of managed objects
+class AstContext {
+public:
+  virtual ~AstContext();
+  void manage(AstContextManaged *Value);
 
-mlga::ast::AstNode::AstNode(mlga::core::AstContext &Context,
-                            const std::vector<AstResult> &Operands)
-    : AstContextManaged(Context), Operands(Operands) {}
+protected:
+  std::unordered_set<AstContextManaged *> Managed;
+};
 
-void mlga::ast::AstNode::setResultsSize(size_t size) {
-  for (size_t i = 0; i < size; ++i) {
-    Results.push_back(AstResult{this, i});
-  }
+/// \brief An object manged by an AstContext
+class AstContextManaged {
+public:
+  AstContextManaged(AstContext &Context);
+  virtual ~AstContextManaged() {}
+  AstContext &getContext() const { return Context; }
+
+protected:
+  AstContext &Context;
+};
+}
 }
 
-mlga::ast::AstOp::AstOp(const AstOp &Op) : AstNode(Op.AstNode) {}
+#endif

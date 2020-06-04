@@ -14,8 +14,8 @@
 // limitations under the License.
 //*****************************************************************************
 
-#ifndef AST_HPP
-#define AST_HPP
+#ifndef MLGA_AST_TYPE_INFO_HPP
+#define MLGA_AST_TYPE_INFO_HPP
 
 #include "ast/exports.hpp"
 
@@ -29,7 +29,7 @@
 #include <vector>
 
 namespace mlga {
-namespace type_info {
+namespace core {
 /// Supports three functions, isType<Type>, asType<Type>, and
 /// asType_ptr<Type> for type-safe
 /// dynamic conversions via static_cast/static_ptr_cast without using C++ RTTI.
@@ -112,8 +112,8 @@ asType_ptr(Value value) {
 }
 
 namespace std {
-template <> struct MLGA_CORE_EXPORT hash<mlga::type_info::DiscreteTypeInfo> {
-  size_t operator()(const mlga::type_info::DiscreteTypeInfo &k) const;
+template <> struct MLGA_CORE_EXPORT hash<mlga::core::DiscreteTypeInfo> {
+  size_t operator()(const mlga::core::DiscreteTypeInfo &k) const;
 };
 }
 #endif

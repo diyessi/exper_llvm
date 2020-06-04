@@ -27,8 +27,8 @@ size_t hash_combine(const std::vector<size_t> &list) {
 }
 
 namespace std {
-size_t std::hash<mlga::type_info::DiscreteTypeInfo>::
-operator()(const mlga::type_info::DiscreteTypeInfo &k) const {
+size_t std::hash<mlga::core::DiscreteTypeInfo>::
+operator()(const mlga::core::DiscreteTypeInfo &k) const {
   size_t NameHash = hash<string>()(string(k.Name));
   size_t VersionHash = hash<decltype(k.Version)>()(k.Version);
   return hash_combine(vector<size_t>{NameHash, VersionHash});

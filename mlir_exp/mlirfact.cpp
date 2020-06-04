@@ -40,10 +40,10 @@ int main(int argc, char **argv) {
 
   cl::ParseCommandLineOptions(argc, argv, "MLIR experiments\n");
   mlir::registerDialect<mlir::my::MyDialect>();
-  AstContext AstContext;
-  ParameterOperation ParamX(AstContext, "X");
-  AstOperation ZZ = ParamX;
-  ParameterOperation ParamX2(ZZ);
+  mlga::core::AstContext AstContext;
+  mlga::ast::ParameterOp ParamX(AstContext, "X");
+  mlga::ast::AstOp ZZ = ParamX;
+  mlga::ast::ParameterOp ParamX2(ZZ);
   auto x = ParamX.getResults().at(0);
   auto y = x + x;
 

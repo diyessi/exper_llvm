@@ -14,22 +14,19 @@
 // limitations under the License.
 //*****************************************************************************
 
-#include "ast/ast.hpp"
+#include "ast/context.hpp"
 
-const mlga::ast::AstOp::type_info_t mlga::ast::ParameterOp::TypeInfo;
-
-const mlga::ast::AstOp::type_info_t mlga::ast::AddOp::TypeInfo;
-
-const mlga::ast::AstOp::type_info_t mlga::ast::MultiplyOp::TypeInfo;
-
-mlga::ast::AstNode::AstNode(mlga::core::AstContext &Context,
-                            const std::vector<AstResult> &Operands)
-    : AstContextManaged(Context), Operands(Operands) {}
-
-void mlga::ast::AstNode::setResultsSize(size_t size) {
-  for (size_t i = 0; i < size; ++i) {
-    Results.push_back(AstResult{this, i});
+mlga::core::AstContext::~AstContext() {
+  for (auto Value : Managed) {
+    delete Value;
   }
 }
 
-mlga::ast::AstOp::AstOp(const AstOp &Op) : AstNode(Op.AstNode) {}
+void mlga::core::AstContext::manage(AstContextManaged *Value) {
+  Managed.insert(Value);
+}
+
+mlga::core::AstContextManaged::AstContextManaged(AstContext &Context)
+    : Context(Context) {
+  Context.manage(this);
+}
