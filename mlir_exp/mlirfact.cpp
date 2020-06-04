@@ -1,3 +1,5 @@
+#include "ast/ast.hpp"
+
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/Dialect.h"
 #include "mlir/IR/Function.h"
@@ -19,8 +21,16 @@
 namespace cl = llvm::cl;
 
 int main(int argc, char **argv) {
+
   cl::ParseCommandLineOptions(argc, argv, "MLIR experiments\n");
   mlir::registerDialect<mlir::my::MyDialect>();
+  AstContext AstContext;
+  ParameterOperation ParamX(AstContext, "X");
+  AstOperation ZZ = ParamX;
+  ParameterOperation ParamX2(ZZ);
+  auto x = ParamX.getResults().at(0);
+  auto y = x + x;
+
   mlir::MLIRContext context;
   mlir::OpBuilder builder(&context);
   mlir::ModuleOp module = mlir::ModuleOp::create(builder.getUnknownLoc());

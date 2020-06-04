@@ -2,7 +2,7 @@ add_subdirectory(include)
 
 set_property(DIRECTORY . APPEND PROPERTY COMPILE_OPTIONS "-fno-rtti")
 
-add_executable(mlirfact mlirfact.cpp my.cpp)
+add_executable(mlirfact mlirfact.cpp my.cpp ast.cpp)
 
 add_dependencies(mlirfact MyIncGen)
 

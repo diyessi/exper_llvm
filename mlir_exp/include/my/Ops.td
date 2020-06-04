@@ -17,8 +17,8 @@ def OneOp : My_Op<"one", [NoSideEffect]> {
     let description = [{
         One operation returns a literal with value 1.
     }];
-    //let arguments = (ins F64ElementsAttr:$value);
-    let results = (outs F64Tensor);
+    let arguments = (ins);
+    let results = (outs AnyTensor);
 }
 
 #endif
