@@ -38,6 +38,7 @@ include(AddLLVM)
 include(AddMLIR)
 include(HandleLLVMOptions)
 
+include_directories(include/)
 include_directories(${LLVM_INCLUDE_DIRS})
 include_directories(${MLIR_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/include)
@@ -48,6 +49,7 @@ add_definitions(${LLVM_DEFINITIONS})
 include(CTest)
 enable_testing()
 
+add_subdirectory(include)
 add_subdirectory(llvm_exp)
 add_subdirectory(mlir_exp)
 

@@ -1,4 +1,3 @@
-add_subdirectory(include)
 
 set_property(DIRECTORY . APPEND PROPERTY COMPILE_OPTIONS "-fno-rtti")
 
@@ -11,7 +10,6 @@ set(LLVM_LINK_COMPONENTS
   Support
   )
 
-include_directories(include/)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include/)
 
 target_link_libraries(mlirfact
