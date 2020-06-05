@@ -16,11 +16,11 @@
 
 #include "ast/ast.hpp"
 
-const mlga::ast::AstOp::type_info_t mlga::ast::ParameterOp::TypeInfo;
+const mlga::ast::TypeInfo mlga::ast::ParameterOp::TypeInfo;
 
-const mlga::ast::AstOp::type_info_t mlga::ast::AddOp::TypeInfo;
+const mlga::ast::TypeInfo mlga::ast::AddOp::TypeInfo;
 
-const mlga::ast::AstOp::type_info_t mlga::ast::MultiplyOp::TypeInfo;
+const mlga::ast::TypeInfo mlga::ast::MultiplyOp::TypeInfo;
 
 mlga::ast::AstNode::AstNode(mlga::core::AstContext &Context,
                             const std::vector<AstResult> &Operands)

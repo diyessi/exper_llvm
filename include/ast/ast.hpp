@@ -31,10 +31,10 @@ namespace mlga {
 namespace ast {
 
 class AstNode;
+using TypeInfo = mlga::core::DiscreteTypeInfo;
 
 class AstOp {
 public:
-  using type_info_t = mlga::core::DiscreteTypeInfo;
   AstOp(const AstOp &Op);
   AstOp(AstNode *AstNode) : AstNode(AstNode) {}
   AstNode *getNode() const { return AstNode; }
@@ -60,7 +60,7 @@ public:
   virtual ~AstNode() {}
   AstNode(mlga::core::AstContext &Context,
           const std::vector<AstResult> &Operands);
-  virtual const AstOp::type_info_t &getTypeInfo() = 0;
+  virtual const TypeInfo &getTypeInfo() = 0;
   void setResultsSize(size_t size);
   const std::vector<AstResult> &getOperands() const { return Operands; };
   const std::vector<AstResult> &getResults() const { return Results; }
@@ -74,17 +74,14 @@ protected:
 struct DefaultAttributes {};
 
 template <typename AstOpType, typename AttributesType = DefaultAttributes>
-class AstOpImp {
+class AstOpImp : public AstOp {
 public:
-  using type_info_t = AstOp::type_info_t;
   class AstNodeImp : public AstNode {
 
   public:
     using AstNode::AstNode;
-    const AstOp::type_info_t &getTypeInfo() { return AstOpType::TypeInfo; }
-    static const AstOp::type_info_t &getStaticTypeInfo() {
-      return AstOpType::TypeInfo;
-    }
+    const TypeInfo &getTypeInfo() { return AstOpType::TypeInfo; }
+    static const TypeInfo &getStaticTypeInfo() { return AstOpType::TypeInfo; }
     AttributesType Attributes;
   };
 
@@ -92,16 +89,17 @@ public:
 
   AstOpImp(const AstOp &Op) : AstOpImp(Op.getNode()) {}
 
-  AstOpImp(AstNode *Node)
-      : AstNode(mlga::core::asType<AstNodeImp>(Node)),
-        Attributes(AstNode ? &AstNode->Attributes : nullptr) {}
+  AstOpImp(class AstNode *Node) : AstOp(mlga::core::asType<AstNodeImp>(Node)) {}
 
-  AstOpImp(const AstOpType &Op)
-      : AstNode(Op->AstNode), Attributes(*AstNode->Attributes) {}
+  AstOpImp(const AstOpType &Op) : AstOp(Op->AstNode) {}
 
   AstOpImp(mlga::core::AstContext &Context,
            const std::vector<AstResult> &Operands)
-      : AstNode(create(Context, Operands)), Attributes(&AstNode->Attributes) {}
+      : AstOp(create(Context, Operands)) {}
+
+  AttributesType *getAttributes() const {
+    return AstNode ? &static_cast<AstNodeImp *>(AstNode)->Attributes : nullptr;
+  }
 
   operator AstOp() const { return AstOp(AstNode); }
 
@@ -113,10 +111,6 @@ public:
   }
   const std::vector<AstResult> &getResults() { return AstNode->getResults(); }
   static void initialize(AstNodeImp *node) { node->setResultsSize(1); }
-
-protected:
-  AstNodeImp *AstNode{nullptr};
-  AttributesType *Attributes{nullptr};
 };
 
 struct ParameterAttributes {
@@ -128,19 +122,19 @@ public:
   using AstOpImp<ParameterOp, ParameterAttributes>::AstOpImp;
   ParameterOp(mlga::core::AstContext &Context, const std::string &Name)
       : ParameterOp(Context, std::vector<AstResult>{}) {
-    Attributes->Name = Name;
+    getAttributes()->Name = Name;
   }
-  static constexpr AstOp::type_info_t TypeInfo{"Parameter", 0};
+  static constexpr TypeInfo TypeInfo{"Parameter", 0};
 };
 
 class AddOp : public AstOpImp<AddOp> {
 public:
-  static constexpr type_info_t TypeInfo{"Add", 0};
+  static constexpr TypeInfo TypeInfo{"Add", 0};
 };
 
 class MultiplyOp : public AstOpImp<MultiplyOp> {
 public:
-  static constexpr type_info_t TypeInfo{"Multiply"};
+  static constexpr TypeInfo TypeInfo{"Multiply"};
 };
 
 inline AstResult operator+(const AstResult &x, const AstResult &y) {
