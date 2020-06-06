@@ -14,34 +14,12 @@
 // limitations under the License.
 //*****************************************************************************
 
-#include "ast/context.hpp"
+#include "my/my_ast.hpp"
 
-mlga::core::Context::~Context() {
-  for (auto Value : Managed) {
-    delete Value;
-  }
-}
-
-void mlga::core::Context::manage(ContextManaged *Value) {
-  Managed.insert(Value);
-}
-
-void mlga::core::Context::unmanage(ContextManaged *Value) {
-  Managed.erase(Value);
-}
-
-mlga::core::ContextManaged::ContextManaged(class Context *Context) {
-  setContext(Context);
-}
-
-void mlga::core::ContextManaged::setContext(Context *NewContext) {
-  if (Manager != NewContext) {
-    if (Manager) {
-      Manager->unmanage(this);
-    }
-    Manager = NewContext;
-    if (Manager) {
-      Manager->manage(this);
-    }
-  }
-}
+const mlga::ast::TypeInfo mlga::my::Add::TypeInfo;
+const mlga::ast::TypeInfo mlga::my::Body::TypeInfo;
+const mlga::ast::TypeInfo mlga::my::Function::TypeInfo;
+const mlga::ast::TypeInfo mlga::my::Multiply::TypeInfo;
+const mlga::ast::TypeInfo mlga::my::Parameters::TypeInfo;
+const mlga::ast::TypeInfo mlga::my::Return::TypeInfo;
+const mlga::ast::TypeInfo mlga::my::Variable::TypeInfo;

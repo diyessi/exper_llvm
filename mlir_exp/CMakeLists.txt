@@ -5,6 +5,7 @@ add_executable(mlirfact
   ast.cpp
   context.cpp
   mlirfact.cpp
+  my_ast.cpp
   my.cpp
   type_info.cpp
   )

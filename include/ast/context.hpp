@@ -21,27 +21,36 @@
 
 namespace mlga {
 namespace core {
-class AstContextManaged;
+class ContextManaged;
 
 /// \brief Manages lifetime of managed objects
-class AstContext {
+class Context {
 public:
-  virtual ~AstContext();
-  void manage(AstContextManaged *Value);
+  virtual ~Context();
+  void manage(ContextManaged *Value);
+  void unmanage(ContextManaged *Value);
+  template <typename OpType, typename... ArgTypes>
+  OpType manage(ArgTypes &&... args) {
+    OpType Value(std::forward<ArgTypes>(args)...);
+    Value.setContext(this);
+    return Value;
+  }
 
 protected:
-  std::unordered_set<AstContextManaged *> Managed;
+  std::unordered_set<ContextManaged *> Managed;
 };
 
-/// \brief An object manged by an AstContext
-class AstContextManaged {
+/// \brief An object manged by an Context
+class ContextManaged {
 public:
-  AstContextManaged(AstContext &Context);
-  virtual ~AstContextManaged() {}
-  AstContext &getContext() const { return Context; }
+  ContextManaged(Context *Manager);
+  ContextManaged() {}
+  virtual ~ContextManaged() {}
+  Context *getContext() const { return Manager; }
+  virtual void setContext(Context *Manager);
 
 protected:
-  AstContext &Context;
+  Context *Manager{nullptr};
 };
 }
 }

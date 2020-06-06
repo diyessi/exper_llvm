@@ -14,7 +14,7 @@
 // limitations under the License.
 //*****************************************************************************
 
-#include "ast/ast.hpp"
+#include "my/my_ast.hpp"
 
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/Dialect.h"
@@ -35,17 +35,18 @@
 #include "my/my.hpp"
 
 namespace cl = llvm::cl;
+namespace my = mlga::my;
 
 int main(int argc, char **argv) {
 
   cl::ParseCommandLineOptions(argc, argv, "MLIR experiments\n");
   mlir::registerDialect<mlir::my::MyDialect>();
-  mlga::core::AstContext AstContext;
-  mlga::ast::ParameterOp ParamX(AstContext, "X");
-  mlga::ast::AstOp ZZ = ParamX;
-  mlga::ast::ParameterOp ParamX2(ZZ);
-  auto x = ParamX.getResults().at(0);
-  auto y = x + x;
+  mlga::core::Context C;
+
+  my::Variable X("X");
+  my::Variable Y("Y");
+  auto Fun = C.manage<my::Function>("test", my::Parameters({X, Y}),
+                                    my::Body({my::Return(X + Y * X)}));
 
   mlir::MLIRContext context;
   mlir::OpBuilder builder(&context);

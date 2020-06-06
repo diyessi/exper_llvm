@@ -28,6 +28,24 @@ def My_Dialect : Dialect {
 class My_Op<string mnemonic, list<OpTrait> traits = []> :
     Op<My_Dialect, mnemonic, traits>;
 
+def AddOp : My_Op<"Add", [NoSideEffect]>{
+    let summary = "Add";
+    let description = [{
+        Adds two values.
+    }];
+    let arguments = (ins AnyTensor);
+    let results = (outs AnyTensor);
+}
+
+def MultiplyOp : My_Op<"Multiply", [NoSideEffect]>{
+    let summary = "Multiply";
+    let description = [{
+        Multiplies two values.
+    }];
+    let arguments = (ins AnyTensor);
+    let results = (outs AnyTensor);
+}
+
 def OneOp : My_Op<"one", [NoSideEffect]> {
     let summary = "one operation";
     let description = [{

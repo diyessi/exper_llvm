@@ -16,20 +16,26 @@
 
 #include "ast/ast.hpp"
 
-const mlga::ast::TypeInfo mlga::ast::ParameterOp::TypeInfo;
-
-const mlga::ast::TypeInfo mlga::ast::AddOp::TypeInfo;
-
-const mlga::ast::TypeInfo mlga::ast::MultiplyOp::TypeInfo;
-
-mlga::ast::AstNode::AstNode(mlga::core::AstContext &Context,
-                            const std::vector<AstResult> &Operands)
-    : AstContextManaged(Context), Operands(Operands) {}
-
-void mlga::ast::AstNode::setResultsSize(size_t size) {
-  for (size_t i = 0; i < size; ++i) {
-    Results.push_back(AstResult{this, i});
+mlga::ast::Node::Node(const Ops &Operands) : Operands(Operands) {
+  for (auto Operand : Operands) {
+    auto C = Operand.getContext();
+    if (C) {
+      setContext(C);
+      return;
+    }
   }
 }
 
-mlga::ast::AstOp::AstOp(const AstOp &Op) : AstNode(Op.AstNode) {}
+void mlga::ast::Node::setContext(mlga::core::Context *Context) {
+  std::vector<Node *> ToDo{this};
+  while (!ToDo.empty()) {
+    auto Node = ToDo.back();
+    ToDo.pop_back();
+    for (auto &Op : Node->getOperands()) {
+      if (!Op.getNode()->getContext()) {
+        ToDo.push_back(Op.getNode());
+      }
+    }
+    Node->mlga::core::ContextManaged::setContext(Context);
+  }
+}
